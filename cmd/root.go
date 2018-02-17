@@ -12,7 +12,7 @@ var rootCmd = &cobra.Command{
 	Long: `Pops helps managing the lifecycle of ops files destined to be deployed in Kubernetes.
 For now, Pops handles Docker images, and Helm charts only.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
+		cmd.Help()
 	},
 }
 
