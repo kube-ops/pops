@@ -4,7 +4,7 @@ os:
 language: go
 
 go:
-  - 1.8.x
+  - 1.9.x
   - master
 
 install: true
