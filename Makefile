@@ -8,7 +8,7 @@ dependencies:
 check: dependencies
 	go get -u github.com/alecthomas/gometalinter
 	gometalinter --install --update
-	gometalinter ./...
+	gometalinter ./... -j2
 
 build: dependencies
 	go build ./...
