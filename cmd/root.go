@@ -37,6 +37,13 @@ func addStackPersistentFlags(cmd *cobra.Command) {
 	_ = viper.BindPFlag("chart-dir", cmd.PersistentFlags().Lookup("chart-dir"))
 }
 
+// AddImagePersistentFlags add the common persistent flags for image.
+func addImagePersistentFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringP("image-dir", "i", "dockers", "Directory containing the Docker images")
+	// nolint: gas
+	_ = viper.BindPFlag("image-dir", cmd.PersistentFlags().Lookup("image-dir"))
+}
+
 // Execute execute the root command.
 func Execute() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Activates verbose mode")

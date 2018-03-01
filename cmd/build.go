@@ -23,13 +23,18 @@ var buildCmd = &cobra.Command{
 }
 
 var buildImageCmd = &cobra.Command{
-	Use:   "image",
+	Use:   "image IMAGE",
 	Short: "Build a container image",
 	Long: `Build a container image.
   Only docker images are supported for now`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		img := image.NewDocker("nginx", "kube-ops", "1.0")
-		img.Print()
+		sourceDir := path.Join(viper.GetString("ProjectRootDir"), viper.GetString("image-dir"))
+		img, err := image.NewDockerImageFromPath(sourceDir, args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+		img.Build()
 	},
 }
 
@@ -54,6 +59,7 @@ func init() {
 	buildCmd.AddCommand(buildImageCmd)
 
 	buildCmd.AddCommand(buildStackCmd)
+	addImagePersistentFlags(buildImageCmd)
 	addStackPersistentFlags(buildStackCmd)
 
 	rootCmd.AddCommand(buildCmd)
