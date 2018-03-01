@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/fsouza/go-dockerclient"
+	"github.com/kube-ops/pops/image/login"
 	"github.com/kube-ops/pops/properties"
 	"github.com/sirupsen/logrus"
 )
@@ -75,6 +76,24 @@ func (dockerImage *DockerImage) Build() {
 			"registry": dockerImage.Registry,
 		}).Println("Building image")
 	if err = client.BuildImage(opts); err != nil {
+		logrus.Fatal(err)
+	}
+}
+
+// Publish publish docker image to remote registry
+func (dockerImage *DockerImage) Publish() {
+	client := getClient()
+	opts := docker.PushImageOptions{
+		Name:         dockerImage.Registry + "/" + dockerImage.Name + ":" + dockerImage.Tag,
+		OutputStream: os.Stdout,
+	}
+	logrus.WithFields(
+		logrus.Fields{
+			"name":     dockerImage.Name,
+			"tag":      dockerImage.Tag,
+			"registry": dockerImage.Registry,
+		}).Println("Publishing image")
+	if err := client.PushImage(opts, login.GetAWSCredentials()); err != nil {
 		logrus.Fatal(err)
 	}
 }
