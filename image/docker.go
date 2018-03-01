@@ -3,6 +3,7 @@ package image
 import (
 	"archive/tar"
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -35,6 +36,11 @@ func NewDockerImageFromPath(dockersDir string, name string) (*DockerImage, error
 	docker := &DockerImage{Path: dockerPath}
 	err := properties.GetYAMLProperties(configPath, docker)
 	return docker, err
+}
+
+// Print pretty display for a docker
+func (dockerImage *DockerImage) Print() {
+	fmt.Printf("%-55s%-23s%-12s\n", dockerImage.Registry, dockerImage.Name, dockerImage.Tag)
 }
 
 // Build build docker image
@@ -95,6 +101,45 @@ func (dockerImage *DockerImage) Publish() {
 		}).Println("Publishing image")
 	if err := client.PushImage(opts, login.GetAWSCredentials()); err != nil {
 		logrus.Fatal(err)
+	}
+}
+
+// IsDockerDir return true if the directory contains a version file
+func IsDockerDir(dir string) bool {
+	configPath := path.Join(dir, "version")
+	_, err := os.Stat(configPath)
+	return err == nil
+}
+
+// ListImages return an array of dockers found in dockersDir
+func ListImages(dockersDir string) []DockerImage {
+	files, err := ioutil.ReadDir(dockersDir)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	var dockers []DockerImage
+	for _, file := range files {
+		if file.IsDir() {
+			absPath := path.Join(dockersDir, file.Name())
+			if IsDockerDir(absPath) {
+				docker, err := NewDockerImageFromPath(dockersDir, file.Name())
+				if err != nil {
+					logrus.Warn(err)
+				} else {
+					dockers = append(dockers, *docker)
+				}
+			}
+		}
+	}
+	return dockers
+}
+
+// PrintList print the list of dockers definitions found in dockersDir
+func PrintList(dockersDir string) {
+	dockers := ListImages(dockersDir)
+	fmt.Printf("%-55s%-23s%-12s\n", "REGISTRY", "NAME", "TAG")
+	for _, docker := range dockers {
+		docker.Print()
 	}
 }
 
