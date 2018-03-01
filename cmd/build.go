@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/kube-ops/pops/image"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -17,18 +18,23 @@ var buildCmd = &cobra.Command{
 	- stack description`,
 }
 
-var imageCmd = &cobra.Command{
-	Use:   "image",
+var dockersDir string
+var buildImageCmd = &cobra.Command{
+	Use:   "image IMAGE",
 	Short: "Build a container image",
 	Long: `Build a container image.
   Only docker images are supported for now`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		img := image.NewDocker("nginx", "kube-ops", "1.0")
-		img.Print()
+		img, err := image.NewDockerImageFromPath(dockersDir, args[0])
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		img.Build()
 	},
 }
 
-var stackCmd = &cobra.Command{
+var buildStackCmd = &cobra.Command{
 	Use:   "stack",
 	Short: "Build a stack artifact",
 	Long: `Build a stack artifact.
@@ -40,8 +46,9 @@ var stackCmd = &cobra.Command{
 }
 
 func init() {
-	buildCmd.AddCommand(imageCmd)
-	buildCmd.AddCommand(stackCmd)
+	buildImageCmd.Flags().StringVarP(&dockersDir, "dockers-dir", "d", "/tmp/test", "Directory where docker definition folders can be found")
+	buildCmd.AddCommand(buildImageCmd)
+	buildCmd.AddCommand(buildStackCmd)
 
 	rootCmd.AddCommand(buildCmd)
 }
