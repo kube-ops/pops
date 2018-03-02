@@ -1,11 +1,11 @@
-package main
+package helper
 
 import (
 	"os"
 )
 
-// exists returns whether the given file or directory exists or not.
-func exists(path string) (bool, error) {
+// Exists returns whether the given file or directory exists or not.
+func Exists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
 		return true, nil
