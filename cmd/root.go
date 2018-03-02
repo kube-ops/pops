@@ -1,9 +1,13 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/kube-ops/pops/config"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var rootCmd = &cobra.Command{
@@ -18,10 +22,26 @@ For now, Pops handles Docker images, and Helm charts only.`,
 	},
 }
 
+func processPersistentFlags() {
+	if viper.GetBool("verbose") {
+		log.SetLevel(log.DebugLevel)
+	}
+}
+
 // Execute execute the root command.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Activates verbose mode")
+	err := viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
+	if err != nil {
+		log.Warn("Couldn't assign flag.", err)
+	}
+
+	cobra.OnInitialize(config.InitializeConfig)
+	cobra.OnInitialize(processPersistentFlags)
+	log.SetLevel(log.WarnLevel)
+
+	if err = rootCmd.Execute(); err != nil {
+		log.Error(err)
 		os.Exit(1)
 	}
 }
