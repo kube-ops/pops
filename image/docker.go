@@ -43,6 +43,25 @@ func (dockerImage *DockerImage) Print() {
 	fmt.Printf("%-55s%-23s%-12s\n", dockerImage.Registry, dockerImage.Name, dockerImage.Tag)
 }
 
+// Create create the layout directory in dockersDir
+func (dockerImage *DockerImage) Create(dockersDir string) {
+	dockerPath := path.Join(dockersDir, dockerImage.Name)
+	configPath := path.Join(dockerPath, "version")
+	dockerfilePath := path.Join(dockerPath, "Dockerfile")
+	err := os.Mkdir(dockerPath, os.FileMode(uint32(0775)))
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	err = properties.SetYAMLProperties(configPath, dockerImage)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	err = ioutil.WriteFile(dockerfilePath, []byte("FROM alpine:3.6"), os.FileMode(uint32(0664)))
+	if err != nil {
+		logrus.Fatal(err)
+	}
+}
+
 // Build build docker image
 func (dockerImage *DockerImage) Build() {
 	client := getClient()
