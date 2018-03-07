@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"os/user"
-	path "path/filepath"
 
 	"github.com/kube-ops/pops/helper"
 	log "github.com/sirupsen/logrus"
@@ -18,24 +17,19 @@ func InitializeConfig() {
 
 	viper.SetConfigName(".pops")
 
-	currDir, err := os.Getwd()
+	gitRootDir, err := helper.GitRootDir()
 	if err != nil {
-		log.Panic("Couldn't initialize configuration.", err)
-	}
+		log.Warn(err)
 
-	for path.Clean(currDir) != "/" {
-		isGitRootDir, fileStatErr := helper.Exists(path.Join(currDir, ".git"))
-
-		if fileStatErr != nil {
-			log.Warn("Error while searching the project git root", err)
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Panic(err)
 		}
 
-		if isGitRootDir {
-			viper.AddConfigPath(currDir)
-			break
-		}
-
-		currDir, _ = path.Split(currDir)
+		viper.Set("ProjectRootDir", cwd)
+	} else {
+		viper.AddConfigPath(gitRootDir)
+		viper.Set("ProjectRootDir", gitRootDir)
 	}
 
 	usr, userErr := user.Current()
