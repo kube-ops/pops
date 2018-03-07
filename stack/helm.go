@@ -1,6 +1,7 @@
 package stack
 
 import (
+	log "github.com/sirupsen/logrus"
 	"net/url"
 	"os/exec"
 )
@@ -18,12 +19,18 @@ type HelmRepository struct {
 }
 
 // Create creates an Helm chart skeleton.
-func (helm *HelmChart) Create() error {
+func (helm *HelmChart) Create(directory string) error {
 	// nolint: gas
 	// Disabling warning from gas caused by a variable in parameter.
-	cmd := exec.Command("helm", "create", helm.Name)
-	_, err := cmd.CombinedOutput()
-	return err
+	cmd := exec.Command("helm", "create", directory)
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		log.Errorf("\"helm create\" failed. Command output:\n%s", output)
+		return err
+	}
+
+	return nil
 }
 
 // Build builds the Helm chart and validates it.
@@ -32,6 +39,6 @@ func (helm *HelmChart) Build() error {
 }
 
 // Publish sends the Helm chart to a repository.
-func (helm *HelmChart) Publish() error {
+func (helm *HelmChart) Publish(sourceFile string) error {
 	return nil
 }

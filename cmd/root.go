@@ -28,19 +28,24 @@ func processPersistentFlags() {
 	}
 }
 
+// AddStackPersistentFlags add the common persistent flags for stacks.
+func addStackPersistentFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringP("chart-dir", "s", "charts", "Directory containing the Helm charts")
+	// nolint: gas
+	_ = viper.BindPFlag("chart-dir", cmd.PersistentFlags().Lookup("chart-dir"))
+}
+
 // Execute execute the root command.
 func Execute() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Activates verbose mode")
-	err := viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
-	if err != nil {
-		log.Warn("Couldn't assign flag.", err)
-	}
+	// nolint: gas
+	_ = viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 
 	cobra.OnInitialize(config.InitializeConfig)
 	cobra.OnInitialize(processPersistentFlags)
 	log.SetLevel(log.WarnLevel)
 
-	if err = rootCmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		log.Error(err)
 		os.Exit(1)
 	}
