@@ -1,9 +1,14 @@
 package cmd
 
 import (
+	"path"
+
 	"github.com/kube-ops/pops/stack"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // buildCmd represents the build command
@@ -24,14 +29,16 @@ var createStackCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		currStack := stack.HelmChart{Name: args[0], Version: ""}
-		if err := currStack.Create(); err != nil {
-			panic(err)
+		destDir := path.Join(viper.GetString("ProjectRootDir"), viper.GetString("chart-dir"), args[0])
+		if err := currStack.Create(destDir); err != nil {
+			log.Fatalf("Couldn't create chart %s.", args[0])
 		}
 	},
 }
 
 func init() {
 	createCmd.AddCommand(createStackCmd)
+	addStackPersistentFlags(createStackCmd)
 
 	rootCmd.AddCommand(createCmd)
 }
