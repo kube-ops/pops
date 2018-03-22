@@ -41,6 +41,10 @@ func Execute() {
 	// nolint: gas
 	_ = viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 
+	rootCmd.PersistentFlags().StringP("out-dir", "o", ".out", "Storage directory for artefacts")
+	// nolint: gas
+	_ = viper.BindPFlag("out-dir", rootCmd.PersistentFlags().Lookup("out-dir"))
+
 	cobra.OnInitialize(config.InitializeConfig)
 	cobra.OnInitialize(processPersistentFlags)
 	log.SetLevel(log.WarnLevel)
