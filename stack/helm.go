@@ -34,7 +34,27 @@ func (helm *HelmChart) Create(directory string) error {
 }
 
 // Build builds the Helm chart and validates it.
-func (helm *HelmChart) Build() error {
+func (helm *HelmChart) Build(sourceDir string, destFile string) error {
+	// nolint: gas
+	// Disabling warning from gas caused by a variable in parameter.
+	cmd := exec.Command("helm", "lint", sourceDir)
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		log.Errorf("\"helm lint\" failed. Command output:\n%s", output)
+		return err
+	}
+
+	// nolint: gas
+	// Disabling warning from gas caused by a variable in parameter.
+	cmd = exec.Command("helm", "package", sourceDir, "-d", destFile)
+	output, err = cmd.CombinedOutput()
+
+	if err != nil {
+		log.Errorf("\"helm build\" failed. Command output:\n%s", output)
+		return err
+	}
+
 	return nil
 }
 
