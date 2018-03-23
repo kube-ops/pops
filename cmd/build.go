@@ -52,7 +52,9 @@ var buildStackCmd = &cobra.Command{
 
 func init() {
 	buildCmd.AddCommand(buildImageCmd)
+
 	buildCmd.AddCommand(buildStackCmd)
+	addStackPersistentFlags(buildStackCmd)
 
 	rootCmd.AddCommand(buildCmd)
 }
