@@ -29,7 +29,7 @@ var publishImageCmd = &cobra.Command{
 		sourceDir := path.Join(viper.GetString("ProjectRootDir"), viper.GetString("image-dir"))
 		img, err := image.NewDockerImageFromPath(sourceDir, args[0])
 		if err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 		img.Publish()
 	},

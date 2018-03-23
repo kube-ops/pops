@@ -13,7 +13,7 @@ import (
 	"github.com/fsouza/go-dockerclient"
 	"github.com/kube-ops/pops/image/login"
 	"github.com/kube-ops/pops/properties"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // DockerImage docker image type
@@ -50,15 +50,15 @@ func (dockerImage *DockerImage) Create(dockersDir string) {
 	dockerfilePath := path.Join(dockerPath, "Dockerfile")
 	err := os.Mkdir(dockerPath, os.FileMode(uint32(0775)))
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	err = properties.SetYAMLProperties(configPath, dockerImage)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	err = ioutil.WriteFile(dockerfilePath, []byte("FROM alpine:3.6"), os.FileMode(uint32(0664)))
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
@@ -72,12 +72,12 @@ func (dockerImage *DockerImage) Build() {
 	defer func() {
 		err := tr.Close()
 		if err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 	}()
 	err := filepath.Walk(dockerImage.Path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 		if !info.IsDir() {
 			bytes := getBytes(path)
@@ -86,7 +86,7 @@ func (dockerImage *DockerImage) Build() {
 		return nil
 	})
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 
 	opts := docker.BuildImageOptions{
@@ -94,14 +94,14 @@ func (dockerImage *DockerImage) Build() {
 		InputStream:  inputbuf,
 		OutputStream: os.Stdout,
 	}
-	logrus.WithFields(
-		logrus.Fields{
+	log.WithFields(
+		log.Fields{
 			"name":     dockerImage.Name,
 			"tag":      dockerImage.Tag,
 			"registry": dockerImage.Registry,
 		}).Println("Building image")
 	if err = client.BuildImage(opts); err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
@@ -112,14 +112,14 @@ func (dockerImage *DockerImage) Publish() {
 		Name:         dockerImage.Registry + "/" + dockerImage.Name + ":" + dockerImage.Tag,
 		OutputStream: os.Stdout,
 	}
-	logrus.WithFields(
-		logrus.Fields{
+	log.WithFields(
+		log.Fields{
 			"name":     dockerImage.Name,
 			"tag":      dockerImage.Tag,
 			"registry": dockerImage.Registry,
 		}).Println("Publishing image")
 	if err := client.PushImage(opts, login.GetAWSCredentials()); err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
@@ -134,7 +134,7 @@ func IsDockerDir(dir string) bool {
 func ListImages(dockersDir string) []DockerImage {
 	files, err := ioutil.ReadDir(dockersDir)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	var dockers []DockerImage
 	for _, file := range files {
@@ -143,7 +143,7 @@ func ListImages(dockersDir string) []DockerImage {
 			if IsDockerDir(absPath) {
 				docker, err := NewDockerImageFromPath(dockersDir, file.Name())
 				if err != nil {
-					logrus.Warn(err)
+					log.Warn(err)
 				} else {
 					dockers = append(dockers, *docker)
 				}
@@ -165,18 +165,18 @@ func PrintList(dockersDir string) {
 func addToTar(tr *tar.Writer, filename string, t time.Time, file []byte, mode int64) {
 	err := tr.WriteHeader(&tar.Header{Name: filename, Size: int64(len(file)), ModTime: t, AccessTime: t, ChangeTime: t, Mode: mode})
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	_, err = tr.Write(file)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
 func getClient() *docker.Client {
 	client, err := docker.NewClient("unix:///var/run/docker.sock")
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	return client
 }
@@ -184,11 +184,11 @@ func getClient() *docker.Client {
 func getBytes(path string) []byte {
 	fileReader, err := os.Open(path)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	readFile, err := ioutil.ReadAll(fileReader)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	return readFile
 }
