@@ -53,6 +53,18 @@ var createImageCmd = &cobra.Command{
 	},
 }
 
+var createClusterCmd = &cobra.Command{
+	Use:     "cluster CLUSTER",
+	Short:   "Create Kops cluster",
+	Aliases: []string{"clusters", "clu", "cl", "c"},
+	Args:    cobra.ExactArgs(1),
+	Long:    `Create Kops cluster directory layout in cluster-dir.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		sourceDir := path.Join(viper.GetString("ProjectRootDir"), viper.GetString("cluster-dir"))
+		log.Print(sourceDir)
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createStackCmd)
 	addStackPersistentFlags(createStackCmd)
@@ -69,5 +81,9 @@ func init() {
 		log.Fatal(err)
 	}
 	createCmd.AddCommand(createImageCmd)
+
+	createCmd.AddCommand(createClusterCmd)
+	addClusterPersistentFlags(createClusterCmd)
+
 	rootCmd.AddCommand(createCmd)
 }

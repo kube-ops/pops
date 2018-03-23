@@ -44,6 +44,13 @@ func addImagePersistentFlags(cmd *cobra.Command) {
 	_ = viper.BindPFlag("image-dir", cmd.PersistentFlags().Lookup("image-dir"))
 }
 
+// AddClusterPersistentFlags add the common persistent flags for image.
+func addClusterPersistentFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringP("cluster-dir", "c", "clusters", "Directory containing the Kops clusters")
+	// nolint: gas
+	_ = viper.BindPFlag("cluster-dir", cmd.PersistentFlags().Lookup("cluster-dir"))
+}
+
 // Execute execute the root command.
 func Execute() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Activates verbose mode")
