@@ -58,7 +58,7 @@ func init() {
 	addStackPersistentFlags(createStackCmd)
 	addImagePersistentFlags(createImageCmd)
 
-	createImageCmd.Flags().StringVarP(&dockerTag, "tag", "t", "", "Tag og the docker image (Required)")
+	createImageCmd.Flags().StringVarP(&dockerTag, "tag", "t", "", "Docker image tag (Required)")
 	err := createImageCmd.MarkFlagRequired("tag")
 	if err != nil {
 		log.Fatal(err)
