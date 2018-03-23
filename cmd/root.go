@@ -25,6 +25,8 @@ For now, Pops handles Docker images, and Helm charts only.`,
 func processPersistentFlags() {
 	if viper.GetBool("verbose") {
 		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
 	}
 }
 
