@@ -3,19 +3,24 @@ package config
 import (
 	"os"
 	"os/user"
+	"path"
 
 	"github.com/kube-ops/pops/helper"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	log "github.com/sirupsen/logrus"
 )
+
+var configName = ".pops"
+var configType = "yaml"
 
 // InitializeConfig Initializes viper with pops presets.
 func InitializeConfig() {
-	viper.SetConfigType("yaml")
+	viper.SetConfigType(configType)
 	viper.SetEnvPrefix("POPS")
 	viper.AutomaticEnv()
 
-	viper.SetConfigName(".pops")
+	viper.SetConfigName(configName)
 
 	gitRootDir, err := helper.GitRootDir()
 	if err != nil {
@@ -42,4 +47,29 @@ func InitializeConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Warn(err)
 	}
+}
+
+// SafeWriteConfig write the configuration file if not exists.
+func SafeWriteConfig() error {
+	configFile := path.Join(viper.GetString("ProjectRootDir"), configName+"."+configType)
+
+	exists, err := helper.Exists(configFile)
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		log.Info("Configuration file already exists. Skipping!!! Path: ", configFile)
+		return nil
+	}
+
+	// Necessary because viper write function returns an error when file does not exists
+	if _, err := os.OpenFile(configFile, os.O_RDONLY|os.O_CREATE, 0600); err != nil {
+		log.Error("Failed to create configuration file: ", configFile)
+		return err
+	}
+
+	log.Info("Creating default configuration file. => ", configFile)
+	return viper.WriteConfigAs(configFile)
 }
