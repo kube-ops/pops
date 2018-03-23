@@ -20,13 +20,13 @@ import (
 type DockerImage struct {
 	Name     string `yaml:"name"`
 	Registry string `yaml:"registry"`
-	Tag      string `yaml:"tag"`
+	Version  string `yaml:"version"`
 	Path     string `yaml:"path,omitempty"`
 }
 
 // NewDockerImage create a new docker image
-func NewDockerImage(name string, registry string, tag string, path string) *DockerImage {
-	return &DockerImage{name, registry, tag, path}
+func NewDockerImage(name string, registry string, version string, path string) *DockerImage {
+	return &DockerImage{name, registry, version, path}
 }
 
 // NewDockerImageFromPath create a new docker image from a docker path
@@ -40,7 +40,7 @@ func NewDockerImageFromPath(dockersDir string, name string) (*DockerImage, error
 
 // Print pretty display for a docker
 func (dockerImage *DockerImage) Print() {
-	fmt.Printf("%-55s%-23s%-12s\n", dockerImage.Registry, dockerImage.Name, dockerImage.Tag)
+	fmt.Printf("%-55s%-23s%-12s\n", dockerImage.Registry, dockerImage.Name, dockerImage.Version)
 }
 
 // Create create the layout directory in dockersDir
@@ -90,14 +90,14 @@ func (dockerImage *DockerImage) Build() {
 	}
 
 	opts := docker.BuildImageOptions{
-		Name:         dockerImage.Registry + "/" + dockerImage.Name + ":" + dockerImage.Tag,
+		Name:         dockerImage.Registry + "/" + dockerImage.Name + ":" + dockerImage.Version,
 		InputStream:  inputbuf,
 		OutputStream: os.Stdout,
 	}
 	log.WithFields(
 		log.Fields{
 			"name":     dockerImage.Name,
-			"tag":      dockerImage.Tag,
+			"version":  dockerImage.Version,
 			"registry": dockerImage.Registry,
 		}).Println("Building image")
 	if err = client.BuildImage(opts); err != nil {
@@ -109,13 +109,13 @@ func (dockerImage *DockerImage) Build() {
 func (dockerImage *DockerImage) Publish() {
 	client := getClient()
 	opts := docker.PushImageOptions{
-		Name:         dockerImage.Registry + "/" + dockerImage.Name + ":" + dockerImage.Tag,
+		Name:         dockerImage.Registry + "/" + dockerImage.Name + ":" + dockerImage.Version,
 		OutputStream: os.Stdout,
 	}
 	log.WithFields(
 		log.Fields{
 			"name":     dockerImage.Name,
-			"tag":      dockerImage.Tag,
+			"version":  dockerImage.Version,
 			"registry": dockerImage.Registry,
 		}).Println("Publishing image")
 	if err := client.PushImage(opts, login.GetAWSCredentials()); err != nil {
