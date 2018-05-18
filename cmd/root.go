@@ -54,6 +54,10 @@ func Execute() {
 	// nolint: gas
 	_ = viper.BindPFlag("out-dir", rootCmd.PersistentFlags().Lookup("out-dir"))
 
+	rootCmd.PersistentFlags().StringP("main-branch", "b", "master", "The main branch of the repository")
+	// nolint: gas
+	_ = viper.BindPFlag("main-branch", rootCmd.PersistentFlags().Lookup("main-branch"))
+
 	cobra.OnInitialize(config.InitializeConfig)
 	cobra.OnInitialize(processPersistentFlags)
 	log.SetLevel(log.WarnLevel)

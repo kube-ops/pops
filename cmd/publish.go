@@ -3,6 +3,7 @@ package cmd
 import (
 	"path"
 
+	"github.com/kube-ops/pops/git"
 	"github.com/kube-ops/pops/image"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,6 +33,7 @@ var publishImageCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		img.Publish()
+		git.CreateTag(viper.GetString("ProjectRootDir"), "image-"+img.Name+"-"+img.Version)
 	},
 }
 

@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/coreos/go-semver/semver"
 	"github.com/fsouza/go-dockerclient"
 	"github.com/kube-ops/pops/image/login"
 	"github.com/kube-ops/pops/properties"
@@ -45,18 +46,10 @@ func (dockerImage *DockerImage) Print() {
 
 // Create create the layout directory in dockersDir
 func (dockerImage *DockerImage) Create(dockersDir string) {
+	dockerImage.SaveToFile(dockersDir)
 	dockerPath := path.Join(dockersDir, dockerImage.Name)
-	configPath := path.Join(dockerPath, "version")
 	dockerfilePath := path.Join(dockerPath, "Dockerfile")
-	err := os.Mkdir(dockerPath, os.FileMode(uint32(0775)))
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = properties.SetYAMLProperties(configPath, dockerImage)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = ioutil.WriteFile(dockerfilePath, []byte("FROM alpine:3.6"), os.FileMode(uint32(0664)))
+	err := ioutil.WriteFile(dockerfilePath, []byte("FROM alpine:3.6"), os.FileMode(uint32(0664)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -123,6 +116,25 @@ func (dockerImage *DockerImage) Publish() {
 	}
 }
 
+// SaveToFile save dockerImage to its version file
+func (dockerImage *DockerImage) SaveToFile(dockersDir string) {
+	dockerPath := path.Join(dockersDir, dockerImage.Name)
+	configPath := path.Join(dockerPath, "version")
+	_, err := os.Stat(dockerPath)
+	if os.IsNotExist(err) {
+		err = os.Mkdir(dockerPath, os.FileMode(uint32(0775)))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	// Do not save path
+	dockerImage.Path = ""
+	err = properties.SetYAMLProperties(configPath, dockerImage)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 // IsDockerDir return true if the directory contains a version file
 func IsDockerDir(dir string) bool {
 	configPath := path.Join(dir, "version")
@@ -151,6 +163,20 @@ func ListImages(dockersDir string) []DockerImage {
 		}
 	}
 	return dockers
+}
+
+// BumpVersion bump the right version number according to importance
+func (dockerImage *DockerImage) BumpVersion(importance string) {
+	version := semver.New(dockerImage.Version)
+	switch importance {
+	case "major":
+		version.BumpMajor()
+	case "minor":
+		version.BumpMinor()
+	default:
+		version.BumpPatch()
+	}
+	dockerImage.Version = version.String()
 }
 
 // PrintList print the list of dockers definitions found in dockersDir
