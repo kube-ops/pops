@@ -50,7 +50,7 @@ func init() {
 	improveCmd.AddCommand(improveImageCmd)
 	addImagePersistentFlags(improveImageCmd)
 
-	improveImageCmd.Flags().BoolVarP(&major, "major", "M", false, "Make a braking change")
+	improveImageCmd.Flags().BoolVarP(&major, "major", "M", false, "Make a breaking change")
 	improveImageCmd.Flags().BoolVarP(&minor, "minor", "m", false, "Add functionality")
 	improveImageCmd.Flags().BoolVarP(&patch, "patch", "p", true, "Make a bug fix")
 
