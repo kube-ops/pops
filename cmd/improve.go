@@ -13,8 +13,8 @@ import (
 // improveCmd represents the improve command
 var improveCmd = &cobra.Command{
 	Use:   "improve",
-	Short: "Create a develoment branch and bump version",
-	Long: `Create a develoment branch named according to the artifact type, name and version.
+	Short: "Create a development branch and bump version",
+	Long: `Create a development branch named according to the artifact type, name and version.
 	It bumps the version too
 	These artifacts can be one of:
 	- container image
@@ -24,8 +24,8 @@ var improveCmd = &cobra.Command{
 var major, minor, patch bool
 var improveImageCmd = &cobra.Command{
 	Use:   "image IMAGE",
-	Short: "Create a develoment branch and bump version",
-	Long: `Create a develoment branch named according to the artifact type, name and version.
+	Short: "Create a development branch and bump version",
+	Long: `Create a development branch named according to the artifact type, name and version.
 	It bumps the version too`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
