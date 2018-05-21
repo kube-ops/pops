@@ -21,7 +21,7 @@ var improveCmd = &cobra.Command{
 	- stack description`,
 }
 
-var major, minor, patch bool
+var bumpMajor, bumpMinor, bumpPatch bool
 var improveImageCmd = &cobra.Command{
 	Use:   "image IMAGE",
 	Short: "Create a development branch and bump version",
@@ -34,9 +34,9 @@ var improveImageCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		if major {
+		if bumpMajor {
 			img.BumpVersion("major")
-		} else if minor {
+		} else if bumpMinor {
 			img.BumpVersion("minor")
 		} else {
 			img.BumpVersion("patch")
@@ -50,9 +50,9 @@ func init() {
 	improveCmd.AddCommand(improveImageCmd)
 	addImagePersistentFlags(improveImageCmd)
 
-	improveImageCmd.Flags().BoolVarP(&major, "major", "M", false, "Make a breaking change")
-	improveImageCmd.Flags().BoolVarP(&minor, "minor", "m", false, "Add functionality")
-	improveImageCmd.Flags().BoolVarP(&patch, "patch", "p", true, "Make a bug fix")
+	improveImageCmd.Flags().BoolVarP(&bumpMinor, "major", "M", false, "Make a breaking change")
+	improveImageCmd.Flags().BoolVarP(&bumpMinor, "minor", "m", false, "Add functionality")
+	improveImageCmd.Flags().BoolVarP(&bumpPatch, "patch", "p", true, "Make a bug fix")
 
 	rootCmd.AddCommand(improveCmd)
 }
